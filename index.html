@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCA - Minecraft Asistanı: XP, Portal, Farm ve Maden Hesaplayıcı</title>
+    <meta name="description" content="Minecraft Asistanı (MCA) ile XP, yakıt, portal, maden katmanı ve farm rehberleri gibi tüm hesaplamaları yapın. 1.21 Bedrock ve Java uyumlu araçlar.">
+    <meta name="keywords" content="Minecraft Asistanı, MCA, Minecraft hesaplayıcı, XP hesaplama, Bedrock 1.21, portal çevirici, maden katmanları, Skin Editor">
+    
+    <style>
+        /* ================================================= */
+        /* TEMA TANIMLAMALARI (CSS DEĞİŞKENLERİ) */
+        /* ================================================= */
+
+        /* AÇIK TEMA (GÜNDÜZ - Varsayılan) */
+        :root {
+            --bg-color: rgba(240, 240, 240, 0.7); 
+            --container-bg: rgba(255, 255, 255, 0.85); 
+            --text-color: #333;
+            --primary-color: #4CAF50; 
+            --result-bg: rgba(232, 245, 233, 0.9); 
+            --result-border: #c8e6c9;
+            /* YENİ GÜNDÜZ RESMİ (Daha Güvenilir Kaynak) */
+            --body-bg-image: url('https://upload.wikimedia.org/wikipedia/en/2/23/Minecraft_Dungeons_Hero_Edition_Cover.jpg'); 
+        }
+
+        /* KOYU TEMA (GECE) */
+        .dark-theme {
+            --bg-color: rgba(30, 30, 30, 0.7); 
+            --container-bg: rgba(45, 45, 45, 0.85); 
+            --text-color: #f0f0f0;
+            --primary-color: #66bb6a; 
+            --result-bg: rgba(60, 60, 60, 0.9); 
+            --result-border: #4d4d4d;
+            /* YENİ GECE RESMİ (Daha Güvenilir Kaynak - Nether/Karanlık tema için) */
+            --body-bg-image: url('https://wallpapers.com/images/hd/creeper-minecraft-hd-5b6t4j1v8n1y88i1.jpg'); 
+        }
+
+        /* ================================================= */
+        /* GENEL STİLLER */
+        /* ================================================= */
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            background-color: var(--bg-color); 
+            color: var(--text-color); 
+            background-image: var(--body-bg-image); 
+            background-attachment: fixed; 
+            background-size: cover; 
+            background-position: center; 
+            transition: background-color 0.5s, color 0.5s, background-image 1s ease-in-out; 
+        }
+
+        .container { 
+            max-width: 900px; 
+            margin: 40px auto; 
+            background: var(--container-bg); 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+        }
+        h1, h2 { 
+            color: var(--primary-color); 
+            border-bottom: 2px solid var(--result-border); 
+            padding-bottom: 5px; 
+        }
+        .calculator { 
+            margin-bottom: 30px; 
+            padding: 15px; 
+            border: 1px solid var(--result-border); 
+            border-radius: 5px; 
+        }
+        .input-group { 
+            margin-bottom: 10px; 
+        }
+        .input-group label { 
+            display: block; 
+            margin-bottom: 5px; 
+            font-weight: bold; 
+        }
+        .input-group input, .input-group select { 
+            width: calc(100% - 12px); 
+            padding: 8px; 
+            border: 1px solid var(--result-border); 
+            background-color: var(--bg-color); 
+            color: var(--text-color);
+            border-radius: 4px; 
+            box-sizing: border-box; 
+        }
+        button { 
+            background-color: var(--primary-color); 
+            color: white; 
+            padding: 10px 15px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            margin-top: 10px; 
+            transition: background-color 0.3s; 
+        }
+        button:hover { 
+            background-color: #45a049; 
+        }
+        .result { 
+            margin-top: 15px; 
+            padding: 10px; 
+            background-color: var(--result-bg); 
+            border: 1px solid var(--result-border); 
+            border-radius: 4px; 
+            font-weight: bold; 
+            min-height: 40px; 
+        }
+        /* Ayarlar ve Kontroller */
+        #top-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        #top-controls button, #language-selector {
+            padding: 8px 12px;
+            font-size: 14px;
+            margin-top: 0;
+            width: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <div id="top-controls">
+             <div class="input-group" style="margin-bottom: 0;">
+                <label for="language-selector" data-key="languageLabel" style="display:inline; margin-right: 10px;">Dil Seçimi:</label>
+                <select id="language-selector" style="width: auto; display: inline-block;">
+                    <option value="tr">Türkçe</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+            <button id="theme-toggle" data-key="themeToggle"></button>
+        </div>
+        
+        <h1 data-key="title">⛏️ MC Asistanı (MCA)</h1>
+
+        ---
+        
+        <h2 data-key="group7Header">🎨 Skin Editör Merkezi</h2>
+        
+        <div class="calculator" id="skin-editor">
+            <h3 data-key="skinHeader">Kendi Skinini Tasarla ve İndir</h3>
+            
+            <p data-key="skinInfo">Minecraft karakterin için özel bir görünüm (Skin) tasarlamak mı istiyorsun? Aşağıdaki düğme seni harici, popüler ve ücretsiz bir Skin Editör servisine yönlendirecektir.</p>
+
+            <button id="openSkinEditorBtn" data-key="openSkinEditorBtn">Skin Editörü Harici Serviste Aç</button>
+            <div class="result" id="skin-sonuc"></div>
+        </div>
+        
+        ---
+
+        <h2 data-key="group6Header">🗺️ Dünya Haritalama Merkezi</h2>
+        
+        <div class="calculator" id="world-mapper">
+            <h3 data-key="mapperHeader">Seed Haritası Bulucu ve Yapı Konumları</h3>
+            
+            <div class="input-group">
+                <label for="seedInput" data-key="seedLabel">Dünya Tohumu (Seed) Numarası:</label>
+                <input type="text" id="seedInput" placeholder="Örn: -123456789 veya sayısal bir değer">
+            </div>
+
+            <div class="input-group">
+                <label for="editionSelect" data-key="editionLabel">Oyun Sürümü (Java/Bedrock):</label>
+                <select id="editionSelect">
+                    <option value="java" data-key="editionOpt1">Java Sürümü</option>
+                    <option value="bedrock" data-key="editionOpt2">Bedrock Sürümü</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="versionSelect" data-key="versionLabel">Minecraft Sürümü:</label>
+                <select id="versionSelect">
+                    <optgroup label="Java Sürümleri">
+                        <option value="1.21" data-key="verOpt1">Java 1.21</option>
+                        <option value="1.20" data-key="verOpt2">Java 1.20</option>
+                        <option value="1.19" data-key="verOpt3">Java 1.19</option>
+                    </optgroup>
+                    <optgroup label="Bedrock Sürümleri">
+                         <option value="1.21.120.24" data-key="verOpt5">Bedrock 1.21.120.24 (YENİ)</option>
+                         <option value="1.20" data-key="verOpt6">Bedrock 1.20</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <button id="findMapBtn" data-key="findMapBtn">Mini Haritayı Harici Serviste Aç</button>
+            <div class="result" id="mapper-sonuc"></div>
+        </div>
+        
+        ---
+        
+        <h2 data-key="group4Header">🌐 Portal ve Boyut Hesaplamaları</h2>
+        
+        <div class="calculator" id="portal-converter">
+            <h3 data-key="portalHeader">Portal Koordinat Çevirici (8:1 Oranı)</h3>
+            <div class="input-group">
+                <label for="inputDimension" data-key="inputDimensionLabel">Mevcut Boyut:</label>
+                <select id="inputDimension">
+                    <option value="overworld" data-key="optOverworld">Ana Dünya (Overworld)</option>
+                    <option value="nether" data-key="optNether">Nether</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="inputX" data-key="inputXLabel">X Koordinatı:</label>
+                <input type="number" id="inputX" value="1000">
+            </div>
+            <div class="input-group">
+                <label for="inputZ" data-key="inputZLabel">Z Koordinatı:</label>
+                <input type="number" id="inputZ" value="1000">
+            </div>
+            <button id="calculatePortalBtn" data-key="calculatePortalBtn">Çevir & Hesapla</button>
+            <div class="result" id="portal-sonuc"></div>
+        </div>
+        
+        ---
+        
+        <h2 data-key="group1Header">🔢 Temel Hesaplamalar</h2>
+        
+        <div class="calculator" id="insaat-hesaplayici">
+            <h3 data-key="insaatHeader">🏗️ İnşaat Hesaplayıcı (Örn: 10x10 Ev)</h3>
+            <div class="input-group">
+                <label for="genislik" data-key="width">Genişlik (X):</label>
+                <input type="number" id="genislik" value="10" min="1">
+            </div>
+            <div class="input-group">
+                <label for="derinlik" data-key="depth">Derinlik (Z):</label>
+                <input type="number" id="derinlik" value="10" min="1">
+            </div>
+            <div class="input-group">
+                <label for="yukseklik" data-key="height">Yükseklik (Y):</label>
+                <input type="number" id="yukseklik" value="4" min="1">
+            </div>
+            <button id="calculateInsaatBtn" data-key="calculateBtn">Hesapla</button>
+            <div class="result" id="insaat-sonuc"></div>
+        </div>
+
+        <div class="calculator" id="xp-hesaplayici">
+            <h3 data-key="xpHeader">✨ Deneyim (XP) Hesaplayıcı</h3>
+            <div class="input-group">
+                <label for="mevcutSeviye" data-key="currentLvl">Mevcut Seviye:</label>
+                <input type="number" id="mevcutSeviye" value="0" min="0">
+            </div>
+            <div class="input-group">
+                <label for="hedefSeviye" data-key="targetLvl">Hedef Seviye:</label>
+                <input type="number" id="hedefSeviye" value="30" min="1">
+            </div>
+            <button id="calculateXpButton" data-key="calculateXpBtn">Gereken XP'yi Hesapla</button>
+            <div class="result" id="xp-sonuc"></div>
+
+            <hr>
+
+            <h4 data-key="mobHeader">⚔️ Mob Kesme Sayısı</h4>
+            <div class="input-group">
+                <label for="mobTipiSelect" data-key="mobType">Kesilecek Mob Tipi:</label>
+                <select id="mobTipiSelect">
+                    <option value="5" data-key="mobOpt1">Zombi/İskelet (5 XP)</option>
+                    <option value="10" data-key="mobOpt2">Blaze (10 XP)</option>
+                    <option value="4" data-key="mobOpt3">Mağara Örümceği (4 XP)</option>
+                </select>
+            </div>
+            <button id="calculateMobButton" data-key="calculateMobBtn">Gereken Mob Sayısını Hesapla</button>
+            <div class="result" id="mob-sayisi-sonuc"></div>
+        </div>
+
+        <div class="calculator" id="yakit-hesaplayici">
+            <h3 data-key="fuelHeader">⚡ Fırın Yakıt Verimi Hesaplayıcı</h3>
+            <div class="input-group">
+                <label for="fuelTypeSelect" data-key="fuelType">Yakıt Türü:</label>
+                <select id="fuelTypeSelect">
+                    <option value="8" data-key="fuelOpt1">Kömür / Odun Kömürü (8)</option>
+                    <option value="100" data-key="fuelOpt2">Lav Kovası (100)</option>
+                    <option value="1.5" data-key="fuelOpt3">Tahta Blok (1.5)</option>
+                    <option value="12" data-key="fuelOpt4">Blaze Çubuğu (12)</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="fuelAmount" data-key="fuelAmount">Yakıt Miktarı:</label>
+                <input type="number" id="fuelAmount" value="1" min="1">
+            </div>
+            <button id="calculateFuelButton" data-key="calculateFuelBtn">Verimi Hesapla</button>
+            <div class="result" id="yakit-sonuc"></div>
+        </div>
+        
+        ---
+        
+        <h2 data-key="group2Header">ℹ️ Madencilik ve Büyü Bilgileri</h2>
+
+        <div class="calculator" id="maden-tavsiyesi">
+            <h3 data-key="oreHeader">💎 Maden Katmanı Tavsiyesi (Y Koordinatı)</h3>
+            <div class="input-group">
+                <label for="oreTypeSelect" data-key="oreType">Aranan Maden Tipi:</label>
+                <select id="oreTypeSelect">
+                    <option value="diamond" data-key="oreOpt1">Elmas (Diamond)</option>
+                    <option value="iron" data-key="oreOpt2">Demir (Iron)</option>
+                    <option value="coal" data-key="oreOpt3">Kömür (Coal)</option>
+                    <option value="ancient_debris" data-key="oreOpt4">Kadim Kalıntı (Ancient Debris)</option>
+                </select>
+            </div>
+            <button id="showOreButton" data-key="showOreBtn">En İyi Katmanı Göster</button>
+            <div class="result" id="maden-sonuc"></div>
+        </div>
+        
+        <div class="calculator" id="balikcilik-sans">
+            <h3 data-key="fishingHeader">🎣 Balıkçılık Şans Hesaplayıcı</h3>
+            <div class="input-group">
+                <label for="lureLevelSelect" data-key="lureLevel">Çekicilik (Lure) Büyüsü Seviyesi (I, II, III):</label>
+                <select id="lureLevelSelect">
+                    <option value="0">Yok (0)</option>
+                    <option value="1">I</option>
+                    <option value="2">II</option>
+                    <option value="3">III</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="luckLevelSelect" data-key="luckLevel">Deniz Şansı (Luck of the Sea) Büyüsü Seviyesi (I, II, III):</label>
+                <select id="luckLevelSelect">
+                    <option value="0">Yok (0)</option>
+                    <option value="1">I</option>
+                    <option value="2">II</option>
+                    <option value="3">III</option>
+                </select>
+            </div>
+            <button id="calculateFishingButton" data-key="calculateFishingBtn">Şansı Hesapla</button>
+            <div class="result" id="balikcilik-sonuc"></div>
+        </div>
+
+        <div class="calculator" id="enchanting-bookshelf-calculator">
+            <h3 data-key="bookshelfHeader">📚 Büyü Masası Kitaplık Hesaplayıcısı</h3>
+            <div class="input-group">
+                <label for="targetEnchantLevel" data-key="targetEnchantLevel">İstenen Büyü Seviyesi (1-30):</label>
+                <input type="number" id="targetEnchantLevel" value="30" min="1" max="30">
+            </div>
+            <button id="calculateBookshelfBtn" data-key="calculateBookshelfBtn">Kitaplık Sayısını Hesapla</button>
+            <div class="result" id="bookshelf-sonuc"></div>
+            
+        </div>
+        
+        <div class="calculator" id="tarif-defteri">
+            <h3 data-key="craftHeader">📜 Craft Tarif Defteri (Genişletilmiş)</h3>
+            <div class="input-group">
+                <label for="craftEsyasiSelect" data-key="craftItem">Hangi Eşyanın Tarifini Arıyorsunuz?</label>
+                <select id="craftEsyasiSelect">
+                    <optgroup label="Büyü ve Aletler">
+                        <option value="saddle" data-key="saddle">Eyer (Saddle) - Üretilemez</option>
+                        <option value="book" data-key="book">Kitap (Book)</option>
+                        <option value="enchanting_table" data-key="enchanting_table">Büyü Masası</option>
+                        <option value="smithing_table" data-key="smithing_table">Demircilik Masası (Smithing)</option>
+                        <option value="lodestone" data-key="lodestone">Yön Taşı (Lodestone)</option>
+                    </optgroup>
+                    <optgroup label="Redstone ve Mekanizmalar">
+                        <option value="piston" data-key="piston">Piston</option>
+                        <option value="sticky_piston" data-key="sticky_piston">Yapışkan Piston</option>
+                        <option value="observer" data-key="observer">Gözlemci (Observer)</option>
+                        <option value="dispenser" data-key="dispenser">Dağıtıcı (Dispenser)</option>
+                        <option value="dropper" data-key="dropper">Damlatıcı (Dropper)</option>
+                    </optgroup>
+                    <optgroup label="Depolama ve Yardımcılar">
+                        <option value="chest" data-key="chest">Sandık (Chest)</option>
+                        <option value="shulker_box" data-key="shulker_box">Shulker Kutusu</option>
+                        <option value="ender_chest" data-key="ender_chest">Ender Sandığı</option>
+                        <option value="furnace" data-key="furnace">Fırın (Furnace)</option>
+                        <option value="smoker" data-key="smoker">Tütsüleyici (Smoker)</option>
+                    </optgroup>
+                    <optgroup label="1.21 Sürümü Blokları">
+                        <option value="crafter" data-key="crafter">Otomatik Craft Ünitesi (Crafter)</option>
+                        <option value="trial_key" data-key="trial_key">Trial Anahtarı</option>
+                    </optgroup>
+                </select>
+            </div>
+            <button id="showRecipeButton" data-key="showRecipeBtn">Tarifi Göster</button>
+            <div class="result" id="tarif-sonuc"></div>
+        </div>
+
+        ---
+        
+        <h2 data-key="group3Header">🚜 FARMLAR ve Rehberler (Genişletilmiş)</h2>
+        
+        <div class="calculator" id="farm-yapimlari">
+            <h3 data-key="farmHeader">⚙️ Farm Bilgisi ve Rehberler</h3>
+            <div class="input-group">
+                <label for="farmTipiSelect" data-key="farmTypeQ">Hangi Farm Hakkında Bilgi Arıyorsunuz?</label>
+                <select id="farmTipiSelect">
+                    <optgroup label="Temel Kaynak Farmları">
+                        <option value="sugarCaneFarm" data-key="farmOpt5">Şeker Kamışı Farmı (Kağıt/Roket)</option>
+                        <option value="bambooFarm" data-key="farmOpt6">Bambu Farmı (Yakıt/İskele)</option>
+                        <option value="cactusFarm" data-key="farmOpt2">Kaktüs Farmı (Yeşil Boya)</option>
+                        <option value="lavaFarm" data-key="farmOpt3">Lav Farmı (Sonsuz Yakıt)</option>
+                    </optgroup>
+                    <optgroup label="Mob ve Eşya Farmları">
+                        <option value="ironFarm" data-key="farmOpt4">Demir Golem Farmı (Demir Külçesi)</option>
+                        <option value="mobFarm" data-key="farmOpt1">Genel Mob Farmı (XP/Eşya)</option>
+                        <option value="goldFarm" data-key="farmOpt7">Altın Farmı (Nether/XP)</option>
+                    </optgroup>
+                </select>
+            </div>
+            <button id="showFarmButton" data-key="showFarmBtn">Farm Bilgisini Göster</button>
+            <div class="result" id="farm-sonuc"></div>
+        </div>
+
+        <div class="calculator" id="strip-mining-calculator">
+            <h3 data-key="stripMiningHeader">⛏️ Şerit Madencilik (Strip Mining) Verim Hesaplayıcı</h3>
+            <div class="input-group">
+                <label for="mineLength" data-key="mineLength">Kazılacak Tünelin Uzunluğu (Blok):</label>
+                <input type="number" id="mineLength" value="100" min="1">
+            </div>
+            <div class="input-group">
+                <label for="tunnelGap" data-key="tunnelGap">Tünel Arasındaki Boşluk (1, 2 veya 3 blok):</label>
+                <select id="tunnelGap">
+                    <option value="1" data-key="gapOpt1">1 Blok Boşluk (Çok Yoğun Arama)</option>
+                    <option value="2" data-key="gapOpt2">2 Blok Boşluk (Verimli Arama)</option>
+                    <option value="3" data-key="gapOpt3">3 Blok Boşluk (Hızlı Arama)</option>
+                </select>
+            </div>
+            <button id="calculateStripMiningBtn" data-key="calculateStripMiningBtn">Verimi Hesapla</button>
+            <div class="result" id="strip-mining-sonuc"></div>
+        </div>
+        
+        ---
+        
+        <h2 data-key="group5Header">🆕 İleri Düzey Hesaplayıcılar</h2>
+
+        <div class="calculator" id="dayaniklilik-hesaplayici">
+            <h3 data-key="durabilityHeader">⚔️ Zırh/Silah Dayanıklılık ve Tamir</h3>
+            <div class="input-group">
+                <label for="itemTypeSelect" data-key="itemType">Eşya Türü:</label>
+                <select id="itemTypeSelect">
+                    <optgroup label="Aletler (Max Durability)">
+                        <option value="pickaxe" data-key="itemOpt1">Kazma (Pickaxe)</option>
+                        <option value="sword" data-key="itemOpt2">Kılıç (Sword)</option>
+                        <option value="shovel" data-key="itemOpt3">Kürek (Shovel)</option>
+                    </optgroup>
+                    <optgroup label="Zırhlar (Max Durability)">
+                        <option value="helmet" data-key="itemOpt4">Kask (Helmet)</option>
+                        <option value="chestplate" data-key="itemOpt5">Göğüslük (Chestplate)</option>
+                        <option value="leggings" data-key="itemOpt6">Pantolon (Leggings)</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="materialSelect" data-key="materialType">Malzeme Türü:</label>
+                <select id="materialSelect">
+                    <option value="250" data-key="matOpt1">Elmas (Diamond) [Max. 1561]</option>
+                    <option value="2031" data-key="matOpt2">Netherit (Netherite) [Max. 2031]</option>
+                    <option value="131" data-key="matOpt3">Demir (Iron) [Max. 250]</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="currentDurability" data-key="currentDura">Mevcut Dayanıklılık:</label>
+                <input type="number" id="currentDurability" value="1000" min="0">
+            </div>
+            <button id="calculateDurabilityBtn" data-key="calculateDuraBtn">Dayanıklılığı Hesapla</button>
+            <div class="result" id="dayaniklilik-sonuc"></div>
+        </div>
+
+        <div class="calculator" id="redstone-gecikme">
+            <h3 data-key="redstoneHeader">⏳ Redstone Gecikme Hesaplayıcı (Tik ↔ Saniye)</h3>
+            <div class="input-group">
+                <label for="inputTicks" data-key="inputTicksLabel">Giriş Tik Değeri (1-4 arası Tekrarlayıcı):</label>
+                <input type="number" id="inputTicks" value="4" min="1">
+            </div>
+            <div class="input-group">
+                <label for="inputComponent" data-key="inputComponentLabel">Gecikmeye Neden Olan Bileşen:</label>
+                <select id="inputComponent">
+                    <option value="repeater" data-key="compOpt1">Tekrarlayıcı (Repeater) / Komparatör (Comparator)</option>
+                    <option value="tick" data-key="compOpt2">Doğrudan Tik Değeri</option>
+                </select>
+            </div>
+            <button id="calculateRedstoneBtn" data-key="calculateRedstoneBtn">Hesapla</button>
+            <div class="result" id="redstone-sonuc"></div>
+        </div>
+
+        <div class="calculator" id="yiyecek-hesaplayici">
+            <h3 data-key="foodHeader">🍲 Yiyecek Doygunluk Verimi Hesaplayıcısı</h3>
+            <div class="input-group">
+                <label for="foodTypeSelect" data-key="foodType">Yiyecek Türü:</label>
+                <select id="foodTypeSelect">
+                    <option value="4|9.6" data-key="foodOpt1">Pişmiş Koyun Eti (Mutton)</option>
+                    <option value="8|12.8" data-key="foodOpt2">Pişmiş Sığır Eti (Steak)</option>
+                    <option value="2|0.6" data-key="foodOpt3">Elma (Apple)</option>
+                    <option value="20|24" data-key="foodOpt4">Büyülü Altın Elma (Enchanted Golden Apple)</option>
+                </select>
+            </div>
+            <button id="calculateFoodBtn" data-key="calculateFoodBtn">Verimi Hesapla</button>
+            <div class="result" id="food-sonuc"></div>
+        </div>
+
+    </div> 
+    <script>
+        
+        // =========================================================================
+        // DİL VE TEMA YÖNETİMİ
+        // =========================================================================
+
+        let currentLang = 'tr'; 
+        
+        // Dinamik çıktılar
+        const dynamicTr = {
+            'fuelEfficiency': (amount, result, efficiency) => `🔥 Toplam **${amount}** adet yakıt ile yaklaşık **${result}** adet eşya eritebilirsiniz.<br>(Her yakıt birimi **${efficiency}** eşya eritti.)`,
+            'fishingChances': (lure, luck, treasure, junk, fish, time) => `🎣 **Balıkçılık Olasılıkları (Çekicilik ${lure}, Deniz Şansı ${luck}):**<br> - **Hazine (Treasure):** %${treasure}<br> - **Önemsiz (Junk):** %${junk}<br> - **Balık (Fish):** %${fish}<br><br>⏱️ **Ortalama Bekleme Süresi (Çekicilik Etkisi):** ${time} saniye (Varsayılan 20 saniye)`,
+            'portalResultOverworld': (x, z) => `🔗 Nether'da bu konumun (X: ${x}, Z: ${z}) karşılığı, Ana Dünya'daki (Overworld) portalınızın ideal konumu olacaktır.`,
+            'portalResultNether': (x, z) => `🔗 Ana Dünya'da bu konumun (X: ${x}, Z: ${z}) karşılığı, Nether'daki portalınızın ideal konumu olacaktır.`,
+            'durabilityResult': (maxDura, currentDura, remaining, percentage) => `🛡️ **Maksimum Dayanıklılık:** ${maxDura}<br>🔧 **Kalan Vuruş/Kullanım:** **${remaining}**<br>📊 **Kalan Yüzde:** %${percentage}<br>🔨 **Tamir Bilgisi:** Tamir için Anvil'de ilgili malzemeyi veya Mending büyüsünü kullanın.`,
+            'redstoneResultRepeater': (ticks, seconds) => `⏳ ${ticks} Tik gecikme (Tekrarlayıcı) **${seconds} saniye**ye eşittir.<br>(1 Tekrarlayıcı minimum 2, maksimum 4 tik gecikme verir. 1 saniye = 20 tik)`,
+            'redstoneResultTick': (ticks, seconds) => `⏳ **${ticks} Tik** gecikme toplam **${seconds} saniye**ye eşittir.`,
+            'foodResult': (hunger, saturation, ratio) => `🍎 **Açlık (Hunger) Desteği:** ${hunger} (10 Kalp)<br>✨ **Doygunluk (Saturation) Desteği:** ${saturation}<br>📈 **Doygunluk/Açlık Verimi (Ratio):** **${ratio}**<br> (Verim ne kadar yüksekse, yiyecek o kadar iyidir. Max verim 2.4)`,
+            'bookshelfResult': (level, required) => `📚 **İstenen Seviye:** ${level}<br>✨ **Gereken Kitaplık Sayısı:** **${required}**<br>🧱 **Gereken Toplam Tahta:** ${required * 6} blok (Kitaplık başına 6 tahta, 3 kitap) `,
+            'stripMiningResult': (length, gap, totalBlocks, visibleBlocks, visibility) => `⛏️ **Tünel Uzunluğu:** ${length} blok<br>↔️ **Boşluk:** ${gap} blok<br>📊 **Kazılan Blok (Tünel Başına):** ${length}<br>👁️ **Görünür Blok Sayısı (Toplam):** **${visibleBlocks}**<br>🔍 **Gizli Blokları Görme Yüzdesi:** %${visibility}`,
+            'mapperResultSuccess': (seed, edition, version) => `🗺️ **Seed Haritası Hazırlandı!** Yeni pencerede **${edition.toUpperCase()}** için **${version}** sürümüne uygun harita açılacaktır.`,
+            'mapperResultError': '⚠️ Lütfen harita servisine göndermek için geçerli bir **Dünya Tohumu (Seed)** girin.',
+            'skinResultSuccess': '🎨 **Skin Editör Açıldı!** Yeni pencerede skin tasarlama servisine yönlendirildiniz.'
+        };
+        const dynamicEn = {
+             'fuelEfficiency': (amount, result, efficiency) => `🔥 With a total of **${amount}** fuel units, you can smelt approximately **${result}** items.<br>(Each fuel unit smelts **${efficiency}** items.)`,
+             'fishingChances': (lure, luck, treasure, junk, fish, time) => `🎣 **Fishing Chances (Lure ${lure}, Luck ${luck}):**<br> - **Treasure:** %${treasure}<br> - **Junk:** %${junk}<br> - **Fish:** %${fish}<br><br>⏱️ **Average Wait Time (Lure Effect):** ${time} seconds (Default 20 seconds)`,
+             'portalResultOverworld': (x, z) => `🔗 The coordinates in the Nether (X: ${x}, Z: ${z}) are the ideal location for your portal to the Overworld.`,
+             'portalResultNether': (x, z) => `🔗 The coordinates in the Overworld (X: ${x}, Z: ${z}) are the ideal location for your portal to the Nether.`,
+             'durabilityResult': (maxDura, currentDura, remaining, percentage) => `🛡️ **Max Durability:** ${maxDura}<br>🔧 **Remaining Uses/Hits:** **${remaining}**<br>📊 **Remaining Percentage:** %${percentage}<br>🔨 **Repair Info:** Use the corresponding material in an Anvil or the Mending enchantment.`,
+             'redstoneResultRepeater': (ticks, seconds) => `⏳ ${ticks} Ticks of delay (Repeater) equals **${seconds} seconds**.<br>(1 Repeater gives 2 to 4 ticks of delay. 1 second = 20 ticks)`,
+             'redstoneResultTick': (ticks, seconds) => `⏳ **${ticks} Ticks** of delay equals a total of **${seconds} seconds**.`,
+             'foodResult': (hunger, saturation, ratio) => `🍎 **Hunger Restored:** ${hunger} (10 Hearts)<br>✨ **Saturation Restored:** ${saturation}<br>📈 **Saturation/Hunger Ratio:** **${ratio}**<br> (Higher ratio means better food. Max ratio is 2.4)`,
+             'bookshelfResult': (level, required) => `📚 **Target Level:** ${level}<br>✨ **Required Bookshelves:** **${required}**<br>🧱 **Total Wood Planks Needed:** ${required * 6} planks (6 planks, 3 books per shelf)`,
+             'stripMiningResult': (length, gap, totalBlocks, visibleBlocks, visibility) => `⛏️ **Tunnel Length:** ${length} blocks<br>↔️ **Gap:** ${gap} blocks<br>📊 **Blocks Mined (Per Tunnel):** ${length}<br>👁️ **Visible Blocks (Total):** **${visibleBlocks}**<br>🔍 **Percentage of Hidden Blocks Visible:** %${visibility}`,
+             'mapperResultSuccess': (seed, edition, version) => `🗺️ **Seed Map Prepared!** A map suitable for **${edition.toUpperCase()}** version **${version}** will open in a new window.`,
+             'mapperResultError': '⚠️ Please enter a valid **World Seed** to send to the map service.',
+             'skinResultSuccess': '🎨 **Skin Editor Opened!** You have been redirected to the external skin design service.'
+        };
+
+        const translations = {
+            'tr': {
+                'languageLabel': 'Dil Seçimi:',
+                'themeToggleDark': 'Koyu Tema',
+                'themeToggleLight': 'Açık Tema',
+                'title': '⛏️ MC Asistanı (MCA)',
+                // Headers
+                'group7Header': '🎨 Skin Editör Merkezi', // YENİ
+                'group6Header': '🗺️ Dünya Haritalama Merkezi', 
+                'group4Header': '🌐 Portal ve Boyut Hesaplamaları',
+                'group1Header': '🔢 Temel Hesaplamalar',
+                'group2Header': 'ℹ️ Madencilik ve Büyü Bilgileri',
+                'group3Header': '🚜 FARMLAR ve Rehberler (Genişletilmiş)',
+                'group5Header': '🆕 İleri Düzey Hesaplayıcılar',
+                
+                // 7. Skin Editör
+                'skinHeader': 'Kendi Skinini Tasarla ve İndir',
+                'skinInfo': 'Minecraft karakterin için özel bir görünüm (Skin) tasarlamak mı istiyorsun? Aşağıdaki düğme seni harici, popüler ve ücretsiz bir Skin Editör servisine yönlendirecektir.',
+                'openSkinEditorBtn': 'Skin Editörü Harici Serviste Aç',
+
+                // 6. Haritalama Merkezi
+                'mapperHeader': 'Seed Haritası Bulucu ve Yapı Konumları',
+                'seedLabel': 'Dünya Tohumu (Seed) Numarası:',
+                'versionLabel': 'Minecraft Sürümü:',
+                'editionLabel': 'Oyun Sürümü (Java/Bedrock):',
+                'editionOpt1': 'Java Sürümü', 'editionOpt2': 'Bedrock Sürümü',
+                // Versiyonlar güncellendi
+                'verOpt1': 'Java 1.21', 'verOpt2': 'Java 1.20', 'verOpt3': 'Java 1.19', 
+                'verOpt5': 'Bedrock 1.21.120.24 (YENİ)', 'verOpt6': 'Bedrock 1.20',
+                'findMapBtn': 'Mini Haritayı Harici Serviste Aç',
+                
+                // 4. Portal
+                'portalHeader': 'Portal Koordinat Çevirici (8:1 Oranı)',
+                'inputDimensionLabel': 'Mevcut Boyut:',
+                'optOverworld': 'Ana Dünya (Overworld)',
+                'optNether': 'Nether',
+                'inputXLabel': 'X Koordinatı:',
+                'inputZLabel': 'Z Koordinatı:',
+                'calculatePortalBtn': 'Çevir & Hesapla',
+                
+                // 1. Temel Hesaplamalar
+                'insaatHeader': '🏗️ İnşaat Hesaplayıcı (Örn: 10x10 Ev)',
+                'width': 'Genişlik (X):',
+                'depth': 'Derinlik (Z):',
+                'height': 'Yükseklik (Y):',
+                'calculateBtn': 'Hesapla',
+                'xpHeader': '✨ Deneyim (XP) Hesaplayıcı',
+                'currentLvl': 'Mevcut Seviye:',
+                'targetLvl': 'Hedef Seviye:',
+                'calculateXpBtn': 'Gereken XP\'yi Hesapla',
+                'mobHeader': '⚔️ Mob Kesme Sayısı',
+                'mobType': 'Kesilecek Mob Tipi:',
+                'mobOpt1': 'Zombi/İskelet (5 XP)',
+                'mobOpt2': 'Blaze (10 XP)',
+                'mobOpt3': 'Mağara Örümceği (4 XP)',
+                'calculateMobBtn': 'Gereken Mob Sayısını Hesapla',
+                'fuelHeader': '⚡ Fırın Yakıt Verimi Hesaplayıcı',
+                'fuelType': 'Yakıt Türü:',
+                'fuelAmount': 'Yakıt Miktarı:',
+                'fuelOpt1': 'Kömür / Odun Kömürü (8)',
+                'fuelOpt2': 'Lav Kovası (100)',
+                'fuelOpt3': 'Tahta Blok (1.5)',
+                'fuelOpt4': 'Blaze Çubuğu (12)',
+                'calculateFuelBtn': 'Verimi Hesapla',
+                
+                // 2. Madencilik ve Büyü
+                'oreHeader': '💎 Maden Katmanı Tavsiyesi (Y Koordinatı)',
+                'oreType': 'Aranan Maden Tipi:',
+                'oreOpt1': 'Elmas (Diamond)',
+                'oreOpt2': 'Demir (Iron)',
+                'oreOpt3': 'Kömür (Coal)',
+                'oreOpt4': 'Kadim Kalıntı (Ancient Debris)',
+                'showOreBtn': 'En İyi Katmanı Göster',
+                'fishingHeader': '🎣 Balıkçılık Şans Hesaplayıcı',
+                'lureLevel': 'Çekicilik (Lure) Büyüsü Seviyesi (I, II, III):',
+                'luckLevel': 'Deniz Şansı (Luck of the Sea) Büyüsü Seviyesi (I, II, III):',
+                'calculateFishingBtn': 'Şansı Hesapla',
+                'bookshelfHeader': '📚 Büyü Masası Kitaplık Hesaplayıcısı',
+                'targetEnchantLevel': 'İstenen Büyü Seviyesi (1-30):',
+                'calculateBookshelfBtn': 'Kitaplık Sayısını Hesapla',
+                'craftHeader': '📜 Craft Tarif Defteri (Genişletilmiş)',
+                'craftItem': 'Hangi Eşyanın Tarifini Arıyorsunuz?',
+                // Craft Options
+                'saddle': 'Eyer (Saddle) - Üretilemez', 'book': 'Kitap (Book)', 'enchanting_table': 'Büyü Masası', 'smithing_table': 'Demircilik Masası (Smithing)', 'lodestone': 'Yön Taşı (Lodestone)',
+                'piston': 'Piston', 'sticky_piston': 'Yapışkan Piston', 'observer': 'Gözlemci (Observer)', 'dispenser': 'Dağıtıcı (Dispenser)', 'dropper': 'Damlatıcı (Dropper)',
+                'chest': 'Sandık (Chest)', 'shulker_box': 'Shulker Kutusu', 'ender_chest': 'Ender Sandığı', 'furnace': 'Fırın (Furnace)', 'smoker': 'Tütsüleyici (Smoker)',
+                'crafter': 'Otomatik Craft Ünitesi (Crafter)', 'trial_key': 'Trial Anahtarı',
+                'showRecipeBtn': 'Tarifi Göster',
+
+                // 3. Farm Rehberleri
+                'farmHeader': '⚙️ Farm Bilgisi ve Rehberler',
+                'farmTypeQ': 'Hangi Farm Hakkında Bilgi Arıyorsunuz?',
+                'farmOpt1': 'Genel Mob Farmı (XP/Eşya)', 'farmOpt2': 'Kaktüs Farmı (Yeşil Boya)', 'farmOpt3': 'Lav Farmı (Sonsuz Yakıt)', 'farmOpt4': 'Demir Golem Farmı (Demir Külçesi)',
+                'farmOpt5': 'Şeker Kamışı Farmı (Kağıt/Roket)', 'farmOpt6': 'Bambu Farmı (Yakıt/İskele)', 'farmOpt7': 'Altın Farmı (Nether/XP)',
+                'showFarmBtn': 'Farm Bilgisini Göster',
+                'stripMiningHeader': '⛏️ Şerit Madencilik (Strip Mining) Verim Hesaplayıcı',
+                'mineLength': 'Kazılacak Tünelin Uzunluğu (Blok):',
+                'tunnelGap': 'Tünel Arasındaki Boşluk (1, 2 veya 3 blok):',
+                'gapOpt1': '1 Blok Boşluk (Çok Yoğun Arama)',
+                'gapOpt2': '2 Blok Boşluk (Verimli Arama)',
+                'gapOpt3': '3 Blok Boşluk (Hızlı Arama)',
+                'calculateStripMiningBtn': 'Verimi Hesapla',
+                
+                // 5. Yeni İleri Düzey Hesaplayıcılar
+                'durabilityHeader': '⚔️ Zırh/Silah Dayanıklılık ve Tamir',
+                'itemType': 'Eşya Türü:',
+                'itemOpt1': 'Kazma (Pickaxe)', 'itemOpt2': 'Kılıç (Sword)', 'itemOpt3': 'Kürek (Shovel)', 'itemOpt4': 'Kask (Helmet)', 'itemOpt5': 'Göğüslük (Chestplate)', 'itemOpt6': 'Pantolon (Leggings)',
+                'materialType': 'Malzeme Türü:',
+                'matOpt1': 'Elmas (Diamond) [Max. 1561]', 'matOpt2': 'Netherit (Netherite) [Max. 2031]', 'matOpt3': 'Demir (Iron) [Max. 250]',
+                'currentDura': 'Mevcut Dayanıklılık:',
+                'calculateDuraBtn': 'Dayanıklılığı Hesapla',
+                
+                'redstoneHeader': '⏳ Redstone Gecikme Hesaplayıcı (Tik ↔ Saniye)',
+                'inputTicksLabel': 'Giriş Tik Değeri (1-4 arası Tekrarlayıcı):',
+                'inputComponentLabel': 'Gecikmeye Neden Olan Bileşen:',
+                'compOpt1': 'Tekrarlayıcı (Repeater) / Komparatör (Comparator)', 'compOpt2': 'Doğrudan Tik Değeri',
+                'calculateRedstoneBtn': 'Hesapla',
+                
+                'foodHeader': '🍲 Yiyecek Doygunluk Verimi Hesaplayıcısı',
+                'foodType': 'Yiyecek Türü:',
+                'foodOpt1': 'Pişmiş Koyun Eti (Mutton)', 'foodOpt2': 'Pişmiş Sığır Eti (Steak)', 'foodOpt3': 'Elma (Apple)', 'foodOpt4': 'Büyülü Altın Elma (Enchanted Golden Apple)',
+                'calculateFoodBtn': 'Verimi Hesapla',
+
+
+                // Hata ve Bilgi Mesajları
+                'errNumber': '⚠️ Lütfen geçerli sayılar girin.',
+                'errLevel': '⚠️ Lütfen geçerli seviyeler girin (Hedef, Mevcuttan yüksek olmalı).',
+                'errXpNeeded': '⚠️ Önce "Gereken XP\'yi Hesapla" düğmesine basmalısınız.',
+                'errNotFound': 'Bilgi bulunamadı.',
+                'errDuraMax': '⚠️ Mevcut Dayanıklılık, seçilen eşyanın maksimum dayanıklılığından fazla olamaz.',
+                'errDuraNegative': '⚠️ Dayanıklılık sıfırdan küçük olamaz.',
+                'errRedstone': '⚠️ Lütfen 1 ile 4 arasında geçerli bir tik değeri girin.',
+                'errEnchantLevel': '⚠️ Lütfen 1 ile 30 arasında bir büyü seviyesi girin.',
+
+                // CRAFT/ORE/FARM INFO (Aynı kalmalı)
+                'saddleInfo': '❌ **Eyer (Saddle)** **üretilemez**.<br>Bulunabileceği yerler: Zindan sandıkları, Nether kaleleri, Köy demircileri ve balık tutma.',
+                'pistonInfo': '⚒️ **Piston** tarifi:<br>Gerekli Malzemeler: **3x Tahta**, **4x Arnavut Kaldırımı**, **1x Kızıltaş Tozu**, **1x Demir Külçesi**.',
+                'sticky_pistonInfo': '⚒️ **Yapışkan Piston** tarifi:<br>Gerekli Malzemeler: **1x Balçık Topu (Slimeball)** + **1x Piston**.',
+                'observerInfo': '⚒️ **Gözlemci (Observer)** tarifi:<br>Gerekli Malzemeler: **6x Arnavut Kaldırımı**, **2x Kızıltaş Tozu**, **1x Kuartz**.',
+                'dispenserInfo': '⚒️ **Dağıtıcı (Dispenser)** tarifi:<br>Gerekli Malzemeler: **7x Arnavut Kaldırımı**, **1x Yay (Bow)**, **1x Kızıltaş Tozu**.',
+                'dropperInfo': '⚒️ **Damlatıcı (Dropper)** tarifi:<br>Gerekli Malzemeler: **7x Arnavut Kaldırımı**, **1x Kızıltaş Tozu**.',
+                'chestInfo': '⚒️ **Sandık (Chest)** tarifi:<br>Gerekli Malzemeler: **8x Tahta Blok (Herhangi bir tür)**.',
+                'shulker_boxInfo': '⚒️ **Shulker Kutusu** tarifi:<br>Gerekli Malzemeler: **2x Shulker Kabuğu**, **1x Sandık**.',
+                'ender_chestInfo': '⚒️ **Ender Sandığı** tarifi:<br>Gerekli Malzemeler: **8x Obsidyen**, **1x Ender Gözü**.',
+                'furnaceInfo': '⚒️ **Fırın (Furnace)** tarifi:<br>Gerekli Malzemeler: **8x Arnavut Kaldırımı** veya **8x Kara Taşı (Blackstone)**.',
+                'smokerInfo': '⚒️ **Tütsüleyici (Smoker)** tarifi:<br>Gerekli Malzemeler: **4x Kütük/Odun (Log)**, **1x Fırın**.',
+                'crafterInfo': '⚒️ **Otomatik Craft Ünitesi (Crafter)** tarifi:<br>Gerekli Malzemeler: **5x Demir Külçesi**, **2x Kızıltaş Tozu**, **1x Dağıtıcı (Dispenser)**, **1x Çalışma Masası**.',
+                'trial_keyInfo': '❌ **Trial Anahtarı** **üretilemez**.<br>Yalnızca Deneme Odalarında (Trial Chambers) **Ganimet Sandıklarından** düşer.',
+                'bookInfo': '⚒️ **Kitap (Book)** tarifi:<br>Gerekli Malzemeler: **3x Kağıt**, **1x Deri**.',
+                'enchanting_tableInfo': '⚒️ **Büyü Masası** tarifi:<br>Gerekli Malzemeler: **1x Kitap**, **2x Elmas**, **4x Obsidyen**.',
+                'smithing_tableInfo': '⚒️ **Demircilik Masası** tarifi:<br>Gerekli Malzemeler: **4x Tahta**, **2x Demir Külçesi**.',
+                'lodestoneInfo': '⚒️ **Yön Taşı (Lodestone)** tarifi:<br>Gerekli Malzemeler: **8x Yontulmuş Taş Tuğlası (Chiseled Stone Bricks)**, **1x Netherit Külçesi**.',
+                'mobFarmInfo': '⚔️ **Genel Mob Farmı**<br>**Temel Mantık:** 128 blok uzağa, ışık seviyesi 0 olan karanlık bir oda inşa edin ve mobları düşüş boşluğuna yönlendirin. Düşüş yüksekliği genellikle 22 bloktur.',
+                'cactusFarmInfo': '🌵 **Kaktüs Farmı**<br>**Temel Mantık:** Kaktüsler büyüdüğünde yanındaki bir bloka (genellikle çit) temas ederek kırılır. Su ile toplanır.',
+                'lavaFarmInfo': '🔥 **Lav Farmı**<br>**Temel Mantık:** **Damlatıcı Taş Uçları**, lavı altındaki **Kazanları** dolduracak şekilde süzdürür. Kazan dolduğunda lav kovayla alınır.',
+                'ironFarmInfo': '🛡️ **Demir Golem Farmı**<br>**Temel Mantık:** 3+ **Köy Sakini** ve bir **Zombi** kullanarak Golem\'lerin korkup doğmasını sağlamak ve onları öldürme alanına yönlendirmek.',
+                'sugarCaneFarmInfo': '🌿 **Şeker Kamışı Farmı**<br>**Temel Mantık:** Kamış suyun yanındaki bir kumluk/toprak blokta yetiştirilir. Kamış büyüdüğünde bir **Gözlemci (Observer)** bunu algılar ve hemen arkasındaki **Piston** kırar. Kırılan kamışlar **Huni (Hopper)** ile toplanır.',
+                'bambooFarmInfo': '🎍 **Bambu Farmı**<br>**Temel Mantık:** Tıpkı şeker kamışı farmı gibi, bambunun büyümesi **Gözlemci** ile algılanır ve **Piston** ile kırılır. Bambu, en hızlı büyüyen bitkilerden biridir ve fırınlarda yakıt olarak kullanılabilir.',
+                'goldFarmInfo': '🪙 **Altın Farmı (Nether)**<br>**Temel Mantık:** Nether\'da dev bir portal inşa etmek ve Zombileşmiş Piglin\'lerin (Zombified Piglin) doğmasını sağlamak. Piglin\'leri düşürerek veya otomatik öldürme sistemiyle keserek **Altın Külçesi** ve **Çürük Et** toplanır. Yüksek XP verir.',
+                'diamondResult': '✅ **Elmas** en çok **Y: -59** katmanında (Bedrock\'un hemen üstü) bulunur. Madencilik için en uygun aralık **Y: -50 ile Y: -64** arasıdır.',
+                'ironResult': '✅ **Demir** en çok üç ana aralıkta bulunur: **Y: 15** (dağlar), **Y: 232** (yüzey) ve **Y: -24** (mağaralar).',
+                'coalResult': '✅ **Kömür** en çok **Y: 96** ile **Y: 136** katmanları arasında bulunur. Yüzeye yakın madencilik daha verimlidir.',
+                'ancient_debrisResult': '✅ **Kadim Kalıntı (Ancient Debris)** en çok **Nether\'da Y: 15** katmanında bulunur. Tıbbi bomba ile patlatarak toplanmalıdır.',
+            },
+            'en': {
+                'languageLabel': 'Language Selection:',
+                'themeToggleDark': 'Switch to Dark',
+                'themeToggleLight': 'Switch to Light',
+                'title': '⛏️ MC Assistant (MCA)',
+                 // Headers
+                'group7Header': '🎨 Skin Editor Center', // NEW
+                'group6Header': '🗺️ World Mapping Center', 
+                'group4Header': '🌐 Portal and Dimension Calculations',
+                'group1Header': '🔢 Basic Calculations',
+                'group2Header': 'ℹ️ Mining and Enchantment Info',
+                'group3Header': '🚜 FARMS and Guides (Extended)',
+                'group5Header': '🆕 Advanced Calculators',
+                
+                // 7. Skin Editör
+                'skinHeader': 'Design and Download Your Own Skin',
+                'skinInfo': 'Do you want to design a custom look (Skin) for your Minecraft character? The button below will redirect you to an external, popular, and free Skin Editor service.',
+                'openSkinEditorBtn': 'Open Skin Editor in External Service',
+
+                // 6. Haritalama Merkezi
+                'mapperHeader': 'Seed Map Finder and Structure Locations',
+                'seedLabel': 'World Seed Number:',
+                'versionLabel': 'Minecraft Version:',
+                'editionLabel': 'Game Edition (Java/Bedrock):',
+                'editionOpt1': 'Java Edition', 'editionOpt2': 'Bedrock Edition',
+                 // Versiyonlar güncellendi
+                'verOpt1': 'Java 1.21', 'verOpt2': 'Java 1.20', 'verOpt3': 'Java 1.19', 
+                'verOpt5': 'Bedrock 1.21.120.24 (NEW)', 'verOpt6': 'Bedrock 1.20',
+                'findMapBtn': 'Open Mini Map in External Service',
+                
+                // 4. Portal
+                'portalHeader': 'Portal Coordinate Converter (8:1 Ratio)',
+                'inputDimensionLabel': 'Current Dimension:',
+                'optOverworld': 'Overworld',
+                'optNether': 'Nether',
+                'inputXLabel': 'X Coordinate:',
+                'inputZLabel': 'Z Coordinate:',
+                'calculatePortalBtn': 'Convert & Calculate',
+                
+                // 1. Basic Calculations
+                'insaatHeader': '🏗️ Building Calculator (E.g.: 10x10 House)',
+                'width': 'Width (X):',
+                'depth': 'Depth (Z):',
+                'height': 'Height (Y):',
+                'calculateBtn': 'Calculate',
+                'xpHeader': '✨ Deneyim (XP) Hesaplayıcı',
+                'currentLvl': 'Current Level:',
+                'targetLvl': 'Target Level:',
+                'calculateXpBtn': 'Calculate Required XP',
+                'mobHeader': '⚔️ Mob Killing Count',
+                'mobType': 'Mob Type to Kill:',
+                'mobOpt1': 'Zombie/Skeleton (5 XP)',
+                'mobOpt2': 'Blaze (10 XP)',
+                'mobOpt3': 'Cave Spider (4 XP)',
+                'calculateMobBtn': 'Calculate Mob Count',
+                'fuelHeader': '⚡ Furnace Fuel Efficiency Calculator',
+                'fuelType': 'Fuel Type:',
+                'fuelAmount': 'Fuel Amount:',
+                'fuelOpt1': 'Coal / Charcoal (8)',
+                'fuelOpt2': 'Lava Bucket (100)',
+                'fuelOpt3': 'Wood Block (1.5)',
+                'fuelOpt4': 'Blaze Rod (12)',
+                'calculateFuelBtn': 'Calculate Efficiency',
+                
+                // 2. Mining and Enchantment
+                'oreHeader': '💎 Maden Katmanı Tavsiyesi (Y Koordinatı)',
+                'oreType': 'Ore Type to Search:',
+                'oreOpt1': 'Diamond',
+                'oreOpt2': 'Iron',
+                'oreOpt3': 'Coal',
+                'oreOpt4': 'Ancient Debris',
+                'showOreBtn': 'Show Best Layer',
+                'fishingHeader': '🎣 Balıkçılık Şans Hesaplayıcı',
+                'lureLevel': 'Lure Enchantment Level (I, II, III):',
+                'luckLevel': 'Luck of the Sea Enchantment Level (I, II, III):',
+                'calculateFishingBtn': 'Calculate Chances',
+                'bookshelfHeader': '📚 Enchanting Bookshelf Calculator',
+                'targetEnchantLevel': 'Target Enchantment Level (1-30):',
+                'calculateBookshelfBtn': 'Calculate Bookshelf Count',
+                'craftHeader': '📜 Crafting Recipe Book (Extended)',
+                'craftItem': 'Which Item\'s Recipe Are You Looking For?',
+                // Craft Options (Aynı kalmalı)
+                'saddle': 'Saddle - Uncraftable', 'book': 'Book', 'enchanting_table': 'Enchanting Table', 'smithing_table': 'Smithing Table', 'lodestone': 'Lodestone',
+                'piston': 'Piston', 'sticky_piston': 'Sticky Piston', 'observer': 'Observer', 'dispenser': 'Dispenser', 'dropper': 'Dropper',
+                'chest': 'Chest', 'shulker_box': 'Shulker Box', 'ender_chest': 'Ender Chest', 'furnace': 'Furnace', 'smoker': 'Smoker',
+                'crafter': 'Crafter (1.21 Auto-Craft)', 'trial_key': 'Trial Key - Uncraftable',
+                'showRecipeBtn': 'Show Recipe',
+
+                // 3. Farm Guides
+                'farmHeader': '⚙️ Farm Bilgisi ve Rehberler',
+                'farmTypeQ': 'Which Farm Are You Looking For?',
+                'farmOpt1': 'General Mob Farm (XP/Drops)', 'farmOpt2': 'Cactus Farm (Green Dye)', 'farmOpt3': 'Lava Farm (Infinite Fuel)', 'farmOpt4': 'Iron Golem Farm (Iron Ingots)',
+                'farmOpt5': 'Sugar Cane Farm (Paper/Rockets)', 'farmOpt6': 'Bamboo Farm (Fuel/Scaffolding)', 'farmOpt7': 'Gold Farm (Nether/XP)',
+                'showFarmBtn': 'Show Farm Info',
+                'stripMiningHeader': '⛏️ Strip Mining Efficiency Calculator',
+                'mineLength': 'Tunnel Length (Blocks):',
+                'tunnelGap': 'Gap Between Tunnels (1, 2 or 3 blocks):',
+                'gapOpt1': '1 Block Gap (High Density Search)',
+                'gapOpt2': '2 Block Gap (Efficient Search)',
+                'gapOpt3': '3 Block Gap (Fast Search)',
+                'calculateStripMiningBtn': 'Calculate Efficiency',
+
+                // 5. New Advanced Calculators
+                'durabilityHeader': '⚔️ Armor/Tool Durability and Repair',
+                'itemType': 'Item Type:',
+                'itemOpt1': 'Pickaxe', 'itemOpt2': 'Sword', 'itemOpt3': 'Shovel', 'itemOpt4': 'Helmet', 'itemOpt5': 'Chestplate', 'itemOpt6': 'Leggings',
+                'materialType': 'Material Type:',
+                'matOpt1': 'Diamond [Max. 1561]', 'matOpt2': 'Netherite [Max. 2031]', 'matOpt3': 'Iron [Max. 250]',
+                'currentDura': 'Current Durability:',
+                'calculateDuraBtn': 'Calculate Durability',
+                
+                'redstoneHeader': '⏳ Redstone Gecikme Hesaplayıcı (Tik ↔ Saniye)',
+                'inputTicksLabel': 'Input Tick Value (1-4 Repeater):',
+                'inputComponentLabel': 'Delay Component:',
+                'compOpt1': 'Repeater / Comparator', 'compOpt2': 'Direct Tick Value',
+                'calculateRedstoneBtn': 'Calculate',
+                
+                'foodHeader': '🍲 Yiyecek Doygunluk Verimi Hesaplayıcısı',
+                'foodType': 'Food Type:',
+                'foodOpt1': 'Cooked Mutton', 'foodOpt2': 'Steak', 'foodOpt3': 'Apple', 'foodOpt4': 'Enchanted Golden Apple',
+                'calculateFoodBtn': 'Calculate Efficiency',
+                
+                // Error and Info Messages (Aynı kalmalı)
+                'errNumber': '⚠️ Please enter valid numbers.',
+                'errLevel': '⚠️ Please enter valid levels (Target must be higher than Current).',
+                'errXpNeeded': '⚠️ You must click "Calculate Required XP" first.',
+                'errNotFound': 'Information not found.',
+                'errDuraMax': '⚠️ Current Durability cannot exceed the max durability of the selected item.',
+                'errDuraNegative': '⚠️ Durability cannot be less than zero.',
+                'errRedstone': '⚠️ Please enter a valid tick value between 1 and 4.',
+                'errEnchantLevel': '⚠️ Please enter an enchantment level between 1 and 30.',
+
+                // CRAFT/ORE/FARM INFO (Aynı kalmalı)
+                'saddleInfo': '❌ **Saddle** **cannot be crafted**.<br>It can be found in: Dungeon chests, Nether fortresses, Village blacksmiths, or by fishing.',
+                'pistonInfo': '⚒️ **Piston** recipe:<br>Required Materials: **3x Wooden Planks**, **4x Cobblestone**, **1x Redstone Dust**, **1x Iron Ingot**.',
+                'sticky_pistonInfo': '⚒️ **Sticky Piston** recipe:<br>Required Materials: **1x Slimeball** + **1x Piston**.',
+                'observerInfo': '⚒️ **Observer** recipe:<br>Required Materials: **6x Cobblestone**, **2x Redstone Dust**, **1x Quartz**.',
+                'dispenserInfo': '⚒️ **Dispenser** recipe:<br>Required Materials: **7x Cobblestone**, **1x Bow**, **1x Redstone Dust**.',
+                'dropperInfo': '⚒️ **Dropper** recipe:<br>Required Materials: **7x Cobblestone**, **1x Redstone Dust**.',
+                'chestInfo': '⚒️ **Chest** recipe:<br>Required Materials: **8x Wood Planks (Any type)**.',
+                'shulker_boxInfo': '⚒️ **Shulker Box** recipe:<br>Required Materials: **2x Shulker Shells**, **1x Chest**.',
+                'ender_chestInfo': '⚒️ **Ender Chest** recipe:<br>Required Materials: **8x Obsidian**, **1x Eye of Ender**.',
+                'furnaceInfo': '⚒️ **Furnace** recipe:<br>Required Materials: **8x Cobblestone** or **8x Blackstone**.',
+                'smokerInfo': '⚒️ **Smoker** recipe:<br>Required Materials: **4x Logs/Wood**, **1x Furnace**.',
+                'crafterInfo': '⚒️ **Crafter** recipe:<br>Required Materials: **5x Iron Ingots**, **2x Redstone Dust**, **1x Dispenser**, **1x Crafting Table**.',
+                'trial_keyInfo': '❌ **Trial Key** **cannot be crafted**.<br>It is only dropped from **Vaults** in Trial Chambers.',
+                'bookInfo': '⚒️ **Kitap (Book)** tarifi:<br>Gerekli Malzemeler: **3x Kağıt**, **1x Deri**.',
+                'enchanting_tableInfo': '⚒️ **Enchanting Table** recipe:<br>Required Materials: **1x Book**, **2x Diamond**, **4x Obsidian**.',
+                'smithing_tableInfo': '⚒️ **Smithing Table** recipe:<br>Required Materials: **4x Wood Planks**, **2x Iron Ingots**.',
+                'lodestoneInfo': '⚒️ **Lodestone** recipe:<br>Required Materials: **8x Chiseled Stone Bricks**, **1x Netherite Ingot**.',
+                'mobFarmInfo': '⚔️ **General Mob Farm**<br>**Core Logic:** Build a dark room (light level 0) 128 blocks away from the player. Mobs are flushed by water into a fall shaft. Fall height is usually 22 blocks.',
+                'cactusFarmInfo': '🌵 **Cactus Farm**<br>**Core Logic:** Cactus blocks break when they grow next to an adjacent block (usually a fence/wall). Collected by water.',
+                'lavaFarmInfo': '🔥 **Lava Farm**<br>**Core Logic:** **Pointed Dripstone** under a **Lava Source** slowly fills **Cauldrons** below. Full cauldrons can be collected with an empty bucket.',
+                'ironFarmInfo': '🛡️ **Iron Golem Farmı**<br>**Core Logic:** Uses 3+ **Villagers** and a **Zombie** to scare them into constantly summoning Iron Golems, which are routed to a killing chamber.',
+                'sugarCaneFarmInfo': '🌿 **Sugar Cane Farm**<br>**Core Logic:** Cane is grown on a sand/dirt block next to water. When it grows, an **Observer** detects it, and a **Piston** immediately breaks the top block. Broken canes are collected by **Hoppers**.',
+                'bambooFarmInfo': '🎍 **Bambu Farmı**<br>**Core Logic:** Tıpkı şeker kamışı farmı gibi, bambunun büyümesi **Gözlemci** ile algılanır ve **Piston** ile kırılır. Bambu, en hızlı büyüyen bitkilerden biridir ve fırınlarda yakıt olarak kullanılabilir.',
+                'goldFarmInfo': '🪙 **Altın Farmı (Nether)**<br>**Core Logic:** Nether\'da dev bir portal inşa etmek ve Zombileşmiş Piglin\'lerin (Zombified Piglin) doğmasını sağlamak. Piglin\'leri düşürerek veya otomatik öldürme sistemiyle keserek **Altın Külçesi** ve **Çürük Et** toplanır. Yüksek XP verir.',
+                'diamondResult': '✅ **Diamond** is most common at **Y: -59** (just above Bedrock). The best mining range is between **Y: -50 and Y: -64**.',
+                'ironResult': '✅ **Iron** is most common in three main ranges: **Y: 15** (dağlar), **Y: 232** (yüzey) and **Y: -24** (mağaralar).',
+                'coalResult': '✅ **Coal** is most common between **Y: 96 and Y: 136** layers. Mining close to the surface is most efficient.',
+                'ancient_debrisResult': '✅ **Ancient Debris** is most common in the **Nether at Y: 15**. It should be collected by explosion (TNT).',
+            }
+        };
+
+
+        // =========================================================================
+        // JAVASCRIPT FONKSİYONLARI (Hepsi Onload içinde çalışacağı için global kalabilir.)
+        // =========================================================================
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
+
+            document.querySelectorAll('[data-key]').forEach(element => {
+                const key = element.getAttribute('data-key');
+                if (typeof t[key] === 'string') {
+                    element.textContent = t[key];
+                }
+            });
+            
+            const themeButton = document.getElementById('theme-toggle');
+            if (themeButton) {
+                 const isDark = document.body.classList.contains('dark-theme');
+                 themeButton.textContent = isDark ? t['themeToggleLight'] : t['themeToggleDark'];
+            }
+            
+            // Güncellenen seçenek listesini de işler
+            ['mobTipiSelect', 'fuelTypeSelect', 'oreTypeSelect', 'craftEsyasiSelect', 'farmTipiSelect', 'inputDimension', 
+             'itemTypeSelect', 'materialSelect', 'inputComponent', 'foodTypeSelect', 'tunnelGap', 'versionSelect', 'editionSelect'].forEach(id => {
+                const selectElement = document.getElementById(id);
+                if (selectElement) {
+                    selectElement.querySelectorAll('option').forEach(opt => {
+                        const key = opt.getAttribute('data-key');
+                        if (key && t[key]) opt.textContent = t[key]; 
+                    });
+                }
+            });
+            
+            // Optgroup çevirisi (Tüm gruplar için genelleştirilmiş)
+            const optgroupSelectors = ['craftEsyasiSelect', 'farmTipiSelect', 'itemTypeSelect', 'versionSelect'];
+            
+            optgroupSelectors.forEach(selectId => {
+                const selectElement = document.getElementById(selectId);
+                if (!selectElement) return;
+
+                const allGroups = {
+                    'Büyü ve Aletler': 'Enchantments & Tools',
+                    'Redstone ve Mekanizmalar': 'Redstone & Mechanisms',
+                    'Depolama ve Yardımcılar': 'Storage & Utility',
+                    '1.21 Sürümü Blokları': '1.21 Update Blocks',
+                    'Temel Kaynak Farmları': 'Basic Resource Farms',
+                    'Mob ve Eşya Farmları': 'Mob and Item Farms',
+                    'Aletler (Max Durability)': 'Tools (Max Durability)',
+                    'Zırhlar (Max Durability)': 'Armor (Max Durability)',
+                    'Java Sürümleri': 'Java Versions', // YENİ
+                    'Bedrock Sürümleri': 'Bedrock Versions' // YENİ
+                };
+
+                selectElement.querySelectorAll('optgroup').forEach(group => {
+                    const currentLabel = group.label;
+                    let newLabel = currentLabel;
+
+                    if (currentLang === 'en') {
+                        newLabel = allGroups[currentLabel] || currentLabel;
+                    } else if (currentLang === 'tr') {
+                        const trKey = Object.keys(allGroups).find(key => allGroups[key] === currentLabel);
+                        newLabel = trKey || currentLabel;
+                    }
+                    group.label = newLabel;
+                });
+            });
+        }
+
+        /* ################################### 0. PORTAL HESAPLAYICISI ################################### */
+        
+        function hesaplaPortal() {
+            const dimension = document.getElementById('inputDimension').value;
+            const inputX = parseFloat(document.getElementById('inputX').value);
+            const inputZ = parseFloat(document.getElementById('inputZ').value);
+            const sonucDiv = document.getElementById('portal-sonuc');
+            const t = translations[currentLang];
+
+            if (isNaN(inputX) || isNaN(inputZ)) {
+                sonucDiv.innerHTML = t['errNumber'];
+                return;
+            }
+
+            let outputX, outputZ;
+            let resultKey;
+
+            if (dimension === 'overworld') {
+                // Overworld -> Nether (8'e böl)
+                outputX = Math.round(inputX / 8);
+                outputZ = Math.round(inputZ / 8);
+                resultKey = currentLang === 'tr' ? dynamicTr['portalResultOverworld'] : dynamicEn['portalResultOverworld'];
+                sonucDiv.innerHTML = `
+                    ➡️ Ana Dünya'dan (Overworld) Nether'a Çeviri:
+                    <br>Nether'da ideal portal konumu: **X: ${outputX}**, **Z: ${outputZ}**
+                    <br>${resultKey(outputX, outputZ)}
+                `;
+            } else {
+                // Nether -> Overworld (8 ile çarp)
+                outputX = Math.round(inputX * 8);
+                outputZ = Math.round(inputZ * 8);
+                resultKey = currentLang === 'tr' ? dynamicTr['portalResultNether'] : dynamicEn['portalResultNether'];
+                sonucDiv.innerHTML = `
+                    ⬅️ Nether'dan Ana Dünya'ya (Overworld) Çeviri:
+                    <br>Ana Dünya'da ideal portal konumu: **X: ${outputX}**, **Z: ${outputZ}**
+                    <br>${resultKey(outputX, outputZ)}
+                `;
+            }
+        }
+        
+        function toggleTheme() {
+            const body = document.body;
+            body.classList.toggle('dark-theme');
+            const isDark = body.classList.contains('dark-theme');
+            
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            setLanguage(currentLang); // Buton metnini güncellemek için
+        }
+        
+        /* ################################### 1. İNŞAAT HESAPLAYICISI ################################### */
+        
+        function hesaplaInsaat() {
+            const X = parseInt(document.getElementById('genislik').value);
+            const Z = parseInt(document.getElementById('derinlik').value);
+            const Y = parseInt(document.getElementById('yukseklik').value);
+            const sonucDiv = document.getElementById('insaat-sonuc');
+            const t = translations[currentLang];
+
+            if (isNaN(X) || isNaN(Z) || isNaN(Y) || X <= 0 || Z <= 0 || Y <= 0) {
+                sonucDiv.innerHTML = t['errNumber'];
+                return;
+            }
+
+            const zemin = X * Z;
+            // Duvarlar: (Çevre uzunluğu) * (Yükseklik - 1 kat zemin hariç)
+            const duvarlar = (Y > 1) ? ((2 * X) + (2 * Z) - 4) * (Y - 1) : 0; 
+            const toplamInsaatBlok = duvarlar + zemin; 
+            const hacimBloklari = X * Z * Y;
+
+            if (currentLang === 'tr') {
+                sonucDiv.innerHTML = `
+                    ✅ **Hesaplanan Yapı: ${X} x ${Z} x ${Y}**
+                    <br>Toplam Gerekli Blok (Zemin + Duvarlar): **${toplamInsaatBlok}** blok
+                    <br>Sadece Duvarlar: **${duvarlar}** blok
+                    <br>Zemin: **${zemin}** blok
+                    <br>Hacim (İçi dolu olsaydı): ${hacimBloklari} blok
+                `;
+            } else { 
+                 sonucDiv.innerHTML = `
+                    ✅ **Calculated Structure: ${X} x ${Z} x ${Y}**
+                    <br>Total Required Blocks (Floor + Walls): **${toplamInsaatBlok}** blocks
+                    <br>Walls Only: **${duvarlar}** blocks
+                    <br>Floor: **${zemin}** blocks
+                    <br>Volume (If solid): ${hacimBloklari} blocks
+                `;
+            }
+        }
+
+        /* ################################### 2. XP VE MOB HESAPLAYICILARI ################################### */
+        
+        function gerekenXpLevel(L) {
+            if (L <= 16) return 2 * L + 7;
+            if (L <= 31) return 5 * L - 38;
+            return 9 * L - 158;
+        }
+
+        function toplamXpRequired(N) {
+            let totalXp = 0;
+            for (let L = 0; L < N; L++) {
+                totalXp += gerekenXpLevel(L);
+            }
+            return totalXp;
+        }
+        
+        function hesaplaXP() {
+            const mevcut = parseInt(document.getElementById('mevcutSeviye').value);
+            const hedef = parseInt(document.getElementById('hedefSeviye').value);
+            const sonucDiv = document.getElementById('xp-sonuc');
+            const t = translations[currentLang];
+
+            if (isNaN(mevcut) || isNaN(hedef) || mevcut < 0 || hedef < 1 || hedef <= mevcut) {
+                sonucDiv.innerHTML = t['errLevel'];
+                sonucDiv.removeAttribute('data-hedef-xp'); 
+                return;
+            }
+
+            const kazanilmasiGerekenXP = toplamXpRequired(hedef) - toplamXpRequired(mevcut);
+            document.getElementById('xp-sonuc').setAttribute('data-hedef-xp', kazanilmasiGerekenXP);
+            
+            if (currentLang === 'tr') {
+                sonucDiv.innerHTML = `
+                    🎯 Hedef Seviye (**${hedef}**) için kazanılması gereken toplam XP: **${kazanilmasiGerekenXP}** XP.
+                    <br>(${mevcut} seviyesinden ${hedef} seviyesine ulaşmak için gereklidir.)
+                `;
+            } else { 
+                sonucDiv.innerHTML = `
+                    🎯 Total XP required for Target Level (**${hedef}**): **${kazanilmasiGerekenXP}** XP.
+                    <br>(Required to reach level ${hedef} from level ${mevcut}.)
+                `;
+            }
+        }
+
+        function hesaplaMobSayisi() {
+            const xpSonucDiv = document.getElementById('xp-sonuc');
+            const xpHedefString = xpSonucDiv.getAttribute('data-hedef-xp');
+            const mobXp = parseInt(document.getElementById('mobTipiSelect').value);
+            const sonucDiv = document.getElementById('mob-sayisi-sonuc');
+            const t = translations[currentLang];
+
+            if (!xpHedefString) {
+                sonucDiv.innerHTML = t['errXpNeeded'];
+                return;
+            }
+            
+            const xpHedef = parseInt(xpHedefString);
+            const gerekenMobSayisi = Math.ceil(xpHedef / mobXp);
+
+            if (currentLang === 'tr') {
+                sonucDiv.innerHTML = `
+                    ⚔️ Kazanılması gereken **${xpHedef}** XP için **${mobXp}** XP veren mob'dan: **${gerekenMobSayisi}** adet kesilmelidir.
+                `;
+            } else {
+                sonucDiv.innerHTML = `
+                    ⚔️ To gain **${xpHedef}** XP with mobs giving **${mobXp}** XP: **${gerekenMobSayisi}** mobs must be killed.
+                `;
+            }
+        }
+        
+        /* ################################### 3. FIRIN VE YAKIT HESAPLAYICISI ################################### */
+        
+        function hesaplaYakit() {
+            const fuelEfficiency = parseFloat(document.getElementById('fuelTypeSelect').value);
+            const fuelAmount = parseInt(document.getElementById('fuelAmount').value);
+            const sonucDiv = document.getElementById('yakit-sonuc');
+            const t = translations[currentLang];
+
+            if (isNaN(fuelAmount) || fuelAmount <= 0) {
+                sonucDiv.innerHTML = t['errNumber'];
+                return;
+            }
+            
+            const totalSmeltedItems = Math.floor(fuelEfficiency * fuelAmount);
+
+            if (currentLang === 'tr') {
+                sonucDiv.innerHTML = dynamicTr['fuelEfficiency'](fuelAmount, totalSmeltedItems, fuelEfficiency);
+            } else {
+                sonucDiv.innerHTML = dynamicEn['fuelEfficiency'](fuelAmount, totalSmeltedItems, fuelEfficiency);
+            }
+        }
+
+        /* ################################### 4. MADEN TAVSİYESİ ################################### */
+
+        function madenTavsiyesiGoster() {
+            const oreType = document.getElementById('oreTypeSelect').value;
+            const sonucDiv = document.getElementById('maden-sonuc');
+            const t = translations[currentLang];
+            
+            let sonuc = t[oreType + 'Result'] || t['errNotFound'];
+
+            sonucDiv.innerHTML = sonuc;
+        }
+
+        /* ################################### 5. BALIKÇILIK ŞANS HESAPLAYICISI ################################### */
+
+        function hesaplaBalikcilikSans() {
+            const lure = parseInt(document.getElementById('lureLevelSelect').value); 
+            const luck = parseInt(document.getElementById('luckLevelSelect').value); 
+            const sonucDiv = document.getElementById('balikcilik-sonuc');
+            
+            const minWaitTime = 5; 
+            let reduction = lure * 5; 
+            let avgWaitTime = Math.max(minWaitTime, 20 - reduction);
+
+            // Temel Şanslar (Varsayılan 1.16+)
+            let treasureChance = 1 + luck; // Base 1
+            let junkChance = 10 - (2 * luck); // Base 10
+            let fishChance = 89 - luck; // Base 89
+            
+            const total = treasureChance + junkChance + fishChance;
+            const treasure = ((treasureChance / total) * 100).toFixed(2);
+            const junk = ((junkChance / total) * 100).toFixed(2);
+            const fish = ((fishChance / total) * 100).toFixed(2);
+
+
+            if (currentLang === 'tr') {
+                sonucDiv.innerHTML = dynamicTr['fishingChances'](lure, luck, treasure, junk, fish, avgWaitTime.toFixed(1));
+            } else {
+                sonucDiv.innerHTML = dynamicEn['fishingChances'](lure, luck, treasure, junk, fish, avgWaitTime.toFixed(1));
+            }
+        }
+
+        /* ################################### 6. BÜYÜ MASASI KİTAPLIK HESAPLAYICISI ################################### */
+
+        function hesaplaBookshelf() {
+            const level = parseInt(document.getElementById('targetEnchantLevel').value);
+            const sonucDiv = document.getElementById('bookshelf-sonuc');
+            const t = translations[currentLang];
+
+            if (isNaN(level) || level < 1 || level > 30) {
+                sonucDiv.innerHTML = t['errEnchantLevel'];
+                return;
+            }
+
+            // Maksimum kitaplık sayısı 15'tir.
+            let required;
+            if (level <= 2) {
+                required = 0; // 1 veya 2 seviye için kitaplık gerekmez.
+            } else if (level <= 30) {
+                required = Math.ceil((level - 1) / 2);
+            }
+
+            required = Math.min(required, 15);
+
+            if (currentLang === 'tr') {
+                sonucDiv.innerHTML = dynamicTr['bookshelfResult'](level, required);
+            } else {
+                sonucDiv.innerHTML = dynamicEn['bookshelfResult'](level, required);
+            }
+        }
+
+        /* ################################### 7. CRAFT TARİF DEFTERİ ################################### */
+
+        function tarifGoster() {
+            const item = document.getElementById('craftEsyasiSelect').value;
+            const sonucDiv = document.getElementById('tarif-sonuc');
+            const t = translations[currentLang];
+            
+            let sonuc = t[item + 'Info'] || t['errNotFound'];
+
+            sonucDiv.innerHTML = sonuc;
+        }
+
+        /* ################################### 8. FARM YAPIMLARI VE REHBERLER ################################### */
+
+        function farmBilgisiGoster() {
+            const farmType = document.getElementById('farmTipiSelect').value;
+            const sonucDiv = document.getElementById('farm-sonuc');
+            const t = translations[currentLang];
+            
+            let sonuc = t[farmType + 'Info'] || t['errNotFound'];
+
+            sonucDiv.innerHTML = sonuc;
+        }
+
+        /* ################################### 9. ŞERİT MADENCİLİK HESAPLAYICISI ################################### */
+        
+        function hesaplaStripMining() {
+            const length = parseInt(document.getElementById('mineLength').value);
+            const gap = parseInt(document.getElementById('tunnelGap').value);
+            const sonucDiv = document.getElementById('strip-mining-sonuc');
+            const t = translations[currentLang];
+
+            if (isNaN(length) || length <= 0) {
+                 sonucDiv.innerHTML = t['errNumber'];
+                return;
+            }
+
+            let visibleBlocks = 0;
+            let visibilityPercentage = 0;
+            
+            if (gap === 1) {
+                visibleBlocks = (length * 2) + length; // Her tünel + sağ/solundaki 1 blok
+                visibilityPercentage = 100;
+            } else if (gap === 2) {
+                // Toplam incelenen alan: 1 (kazılan) + 1 (sol) + 1 (sağ) + 2 (boşluk) = 5 blok
+                // 2 blok görülür (sol ve sağ). 2 blok kaçar. Görünürlük: 2 / (2 + 2) = %50
+                visibilityPercentage = (100 * 2) / 4; 
+                visibleBlocks = Math.round(length * 2 * (visibilityPercentage / 100));
+            } else if (gap === 3) {
+                // Toplam incelenen alan: 1 (kazılan) + 1 (sol) + 1 (sağ) + 3 (boşluk) = 6 blok
+                // 2 blok görülür. 3 blok kaçar. Görünürlük: 2 / (2 + 3) = %40
+                visibilityPercentage = (100 * 2) / 5; 
+                visibleBlocks = Math.round(length * 2 * (visibilityPercentage / 100));
+            }
+
+
+            if (currentLang === 'tr') {
+                 sonucDiv.innerHTML = dynamicTr['stripMiningResult'](length, gap, length, visibleBlocks, visibilityPercentage.toFixed(0));
+            } else {
+                 sonucDiv.innerHTML = dynamicEn['stripMiningResult'](length, gap, length, visibleBlocks, visibilityPercentage.toFixed(0));
+            }
+        }
+        
+        /* ################################### 10. ZIRH/SİLAH DAYANIKLILIK HESAPLAYICISI ################################### */
+
+        // Eşya Tipine göre baz dayanıklılık çarpanları (Diamond)
+        const BASE_DURABILITY = {
+            'pickaxe': 1561, 
+            'sword': 1561, 
+            'shovel': 1561, 
+            'helmet': 429, 
+            'chestplate': 694, 
+            'leggings': 601 
+        };
+
+        function calculateMaxDurability(itemType, materialValue) {
+            const matValue = parseInt(materialValue);
+            
+            if (matValue === 2031) { // Netherite
+                const NETHERITE_DURA_FACTORS = {
+                    'pickaxe': 2031, 'sword': 2031, 'shovel': 2031,
+                    'helmet': 551, 'chestplate': 801, 'leggings': 751
+                };
+                return NETHERITE_DURA_FACTORS[itemType];
+            } else if (matValue === 250) { // Diamond 
+                return BASE_DURABILITY[itemType];
+            } else if (matValue === 131) { // Iron
+                const IRON_DURA_FACTORS = {
+                    'pickaxe': 250, 'sword': 250, 'shovel': 250,
+                    'helmet': 165, 'chestplate': 240, 'leggings': 225
+                };
+                 return IRON_DURA_FACTORS[itemType];
+            }
+            return 1; 
+        }
+
+        function hesaplaDayaniklilik() {
+            const itemType = document.getElementById('itemTypeSelect').value;
+            const materialValue = document.getElementById('materialSelect').value;
+            const currentDurability = parseInt(document.getElementById('currentDurability').value);
+            const sonucDiv = document.getElementById('dayaniklilik-sonuc');
+            const t = translations[currentLang];
+
+            if (isNaN(currentDurability)) {
+                sonucDiv.innerHTML = t['errNumber'];
+                return;
+            }
+            if (currentDurability < 0) {
+                 sonucDiv.innerHTML = t['errDuraNegative'];
+                return;
+            }
+
+            const maxDura = calculateMaxDurability(itemType, materialValue);
+            
+            if (currentDurability > maxDura) {
+                 sonucDiv.innerHTML = t['errDuraMax'];
+                return;
+            }
+
+            const remaining = maxDura - currentDurability;
+            const percentage = ((currentDurability / maxDura) * 100).toFixed(2);
+
+            if (currentLang === 'tr') {
+                 sonucDiv.innerHTML = dynamicTr['durabilityResult'](maxDura, currentDurability, remaining, percentage);
+            } else {
+                 sonucDiv.innerHTML = dynamicEn['durabilityResult'](maxDura, currentDurability, remaining, percentage);
+            }
+        }
+        
+        /* ################################### 11. REDSTONE GECİKME HESAPLAYICISI ################################### */
+        
+        function hesaplaRedstone() {
+            const inputTicks = parseInt(document.getElementById('inputTicks').value);
+            const component = document.getElementById('inputComponent').value;
+            const sonucDiv = document.getElementById('redstone-sonuc');
+            const t = translations[currentLang];
+            
+            if (isNaN(inputTicks) || inputTicks <= 0) {
+                 sonucDiv.innerHTML = t['errNumber'];
+                return;
+            }
+            
+            let totalTicks;
+            if (component === 'repeater') {
+                if (inputTicks < 1 || inputTicks > 4) {
+                    sonucDiv.innerHTML = t['errRedstone'];
+                    return;
+                }
+                totalTicks = inputTicks * 2; 
+            } else {
+                totalTicks = inputTicks;
+            }
+            
+            const totalSeconds = (totalTicks / 20).toFixed(2);
+
+            if (currentLang === 'tr') {
+                if (component === 'repeater') {
+                    sonucDiv.innerHTML = dynamicTr['redstoneResultRepeater'](totalTicks, totalSeconds);
+                } else {
+                    sonucDiv.innerHTML = dynamicTr['redstoneResultTick'](totalTicks, totalSeconds);
+                }
+            } else {
+                if (component === 'repeater') {
+                    sonucDiv.innerHTML = dynamicEn['redstoneResultRepeater'](totalTicks, totalSeconds);
+                } else {
+                    sonucDiv.innerHTML = dynamicEn['redstoneResultTick'](totalTicks, totalSeconds);
+                }
+            }
+        }
+
+        /* ################################### 12. YİYECEK DOYGUNLUK HESAPLAYICISI ################################### */
+        
+        function hesaplaYiyecek() {
+            const foodValue = document.getElementById('foodTypeSelect').value;
+            const sonucDiv = document.getElementById('food-sonuc');
+            const t = translations[currentLang];
+
+            if (!foodValue.includes('|')) {
+                 sonucDiv.innerHTML = t['errNotFound'];
+                return;
+            }
+            
+            const [hungerValue, saturationValue] = foodValue.split('|').map(Number);
+            
+            const ratio = (saturationValue / hungerValue).toFixed(3);
+
+            if (currentLang === 'tr') {
+                sonucDiv.innerHTML = dynamicTr['foodResult'](hungerValue, saturationValue, ratio);
+            } else {
+                sonucDiv.innerHTML = dynamicEn['foodResult'](hungerValue, saturationValue, ratio);
+            }
+        }
+
+        /* ################################### 13. DÜNYA HARİTALAMA MERKEZİ ################################### */
+
+        function haritaGoster() {
+            const seedInput = document.getElementById('seedInput').value.trim();
+            const version = document.getElementById('versionSelect').value;
+            const edition = document.getElementById('editionSelect').value;
+            const sonucDiv = document.getElementById('mapper-sonuc');
+            const t = translations[currentLang];
+
+            if (seedInput === "") {
+                sonucDiv.innerHTML = t['mapperResultError'];
+                return;
+            }
+
+            // ChunkBase Entegrasyonu
+            // Bedrock için sürüm formatını ChunkBase'e uygun hale getiriyoruz.
+            let chunkbaseEdition = edition === 'bedrock' ? '&edition=bedrock' : '';
+            let chunkbaseVersion;
+            
+            // Eğer Bedrock'un detaylı sürümü seçilmişse, ChunkBase genellikle temel sürümü ister (1.21).
+            if (version.includes('1.21.120.24')) {
+                chunkbaseVersion = '&version=1.21';
+            } else {
+                 chunkbaseVersion = `&version=${version.replace(/java |bedrock /i, '')}`;
+            }
+
+            // Chunkbase URL'si oluşturulur.
+            const mapURL = `https://www.chunkbase.com/apps/seed-map#seed=${encodeURIComponent(seedInput)}${chunkbaseVersion}${chunkbaseEdition}`;
+
+            // Yeni pencerede açılır
+            window.open(mapURL, '_blank');
+
+            if (currentLang === 'tr') {
+                sonucDiv.innerHTML = dynamicTr['mapperResultSuccess'](seedInput, edition, version);
+            } else {
+                sonucDiv.innerHTML = dynamicEn['mapperResultSuccess'](seedInput, edition, version);
+            }
+        }
+        
+        /* ################################### 14. SKIN EDİTÖR MERKEZİ (YENİ) ################################### */
+
+        function openSkinEditor() {
+            const editorURL = 'https://www.minecraftskins.com/skin-editor/'; 
+            const sonucDiv = document.getElementById('skin-sonuc');
+            const t = translations[currentLang];
+
+            // Yeni pencerede açılır
+            window.open(editorURL, '_blank');
+
+            if (currentLang === 'tr') {
+                sonucDiv.innerHTML = dynamicTr['skinResultSuccess'];
+            } else {
+                sonucDiv.innerHTML = dynamicEn['skinResultSuccess'];
+            }
+        }
+
+        
+        // =========================================================================
+        // SAYFA BAŞLANGICI VE DÜĞME ATAMALARI (TÜM DÜĞMELER BURADA)
+        // =========================================================================
+        
+        window.onload = function() {
+            
+            // --- 1. DİL ve TEMA YÜKLEME ---
+            const savedTheme = localStorage.getItem('theme');
+            const body = document.body;
+            if (savedTheme === 'dark') {
+                body.classList.add('dark-theme');
+            } else {
+                body.classList.remove('dark-theme');
+            }
+
+            const langSelector = document.getElementById('language-selector');
+            const savedLang = localStorage.getItem('language') || 'tr';
+            if(langSelector) langSelector.value = savedLang;
+            setLanguage(savedLang); 
+            
+            // --- 2. DÜĞME VE SEÇENEKLERİ ATAMA ---
+            
+            // Dil seçici
+            if (langSelector) {
+                 langSelector.addEventListener('change', function() {
+                     localStorage.setItem('language', this.value);
+                     setLanguage(this.value);
+                 });
+            }
+            
+            // Tema değiştirme düğmesi
+            const themeButton = document.getElementById('theme-toggle');
+            if (themeButton) {
+                themeButton.addEventListener('click', toggleTheme);
+            }
+            
+            // Hesaplama Düğmeleri (Önceki ve Yeni Eklenenler)
+            document.getElementById('calculatePortalBtn')?.addEventListener('click', hesaplaPortal);
+            document.getElementById('calculateInsaatBtn')?.addEventListener('click', hesaplaInsaat);
+            document.getElementById('calculateXpButton')?.addEventListener('click', hesaplaXP);
+            document.getElementById('calculateMobButton')?.addEventListener('click', hesaplaMobSayisi);
+            document.getElementById('calculateFuelButton')?.addEventListener('click', hesaplaYakit);
+            document.getElementById('showOreButton')?.addEventListener('click', madenTavsiyesiGoster);
+            document.getElementById('calculateFishingButton')?.addEventListener('click', hesaplaBalikcilikSans);
+            document.getElementById('showRecipeButton')?.addEventListener('click', tarifGoster);
+            document.getElementById('showFarmButton')?.addEventListener('click', farmBilgisiGoster);
+            document.getElementById('calculateDurabilityBtn')?.addEventListener('click', hesaplaDayaniklilik);
+            document.getElementById('calculateRedstoneBtn')?.addEventListener('click', hesaplaRedstone);
+            document.getElementById('calculateFoodBtn')?.addEventListener('click', hesaplaYiyecek);
+            document.getElementById('calculateBookshelfBtn')?.addEventListener('click', hesaplaBookshelf); 
+            document.getElementById('calculateStripMiningBtn')?.addEventListener('click', hesaplaStripMining); 
+            
+            // HARİTA VE SKİN BUTONLARI
+            document.getElementById('findMapBtn')?.addEventListener('click', haritaGoster); 
+            document.getElementById('openSkinEditorBtn')?.addEventListener('click', openSkinEditor); 
+        };
+        
+
+    </script>
+</body>
+</html>
